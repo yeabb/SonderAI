@@ -2,6 +2,7 @@ asgiref==3.8.1
 asttokens==3.0.0
 decorator==5.1.1
 Django==5.1.4
+django-jinja==2.11.0
 executing==2.1.0
 ipython==8.30.0
 jedi==0.19.2
@@ -16,8 +17,8 @@ prompt_toolkit==3.0.48
 ptyprocess==0.7.0
 pure_eval==0.2.3
 Pygments==2.18.0
+sonderPyvis @ git+https://github.com/yeabb/sonderPyvis.git@711792335b43be55be128d95e9712e72cec06991
 sqlparse==0.5.2
 stack-data==0.6.3
 traitlets==5.14.3
 wcwidth==0.2.13
-git+https://github.com/yeabb/sonderPyvis.git
