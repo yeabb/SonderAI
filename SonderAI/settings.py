@@ -55,12 +55,6 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'SonderAI.urls'
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django_jinja.jinja2.Jinja2',
-        'DIRS': [os.path.join(BASE_DIR,"templates")],
-        'APP_DIRS': True,
-        'OPTIONS': {}
-    },
     
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -74,6 +68,13 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
         },
+    },
+    
+    {
+        'BACKEND': 'django_jinja.jinja2.Jinja2',
+        'DIRS': [os.path.join(BASE_DIR,"templates")],
+        'APP_DIRS': True,
+        'OPTIONS': {}
     },
 ]
 

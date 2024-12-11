@@ -17,7 +17,7 @@ prompt_toolkit==3.0.48
 ptyprocess==0.7.0
 pure_eval==0.2.3
 Pygments==2.18.0
-sonderPyvis @ git+https://github.com/yeabb/sonderPyvis.git@711792335b43be55be128d95e9712e72cec06991
+sonderPyvis @ git+https://github.com/yeabb/sonderPyvis.git@main#egg=sonderPyvis
 sqlparse==0.5.2
 stack-data==0.6.3
 traitlets==5.14.3
