@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_jinja',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -86,8 +87,13 @@ WSGI_APPLICATION = 'SonderAI.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'graphs',
+        'USER': 'postgres',
+        'PASSWORD': "1234",
+        'HOST': 'localhost',
+        'PORT': '5432',
+    
     }
 }
 
