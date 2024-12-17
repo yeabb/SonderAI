@@ -2,33 +2,38 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from sonderPyvis.network import Network
 from .models import TweetNode
+from openai import OpenAI
+import os
 import json
 
 from django.contrib.auth.models import User
 from random import choice, randint, sample
 from datetime import datetime, timedelta
+from scipy.spatial.distance import cosine
     
 def constructGraph(request):
-    # nodes = TweetNode.objects.all()
-    # print(nodes)
+    client = initOpenAI()
+    tweets, edges = candidate_source()
+    network_graph = Network(neighborhood_highlight=True)
+    for tweet in tweets:
+        print(tweet.id)
+        network_graph.add_node(tweet.id, tweet.title)
     
-    # net = experiment()
+    network_graph.add_edges(edges)
+        
+    # response = client.embeddings.create(
+    #     model="text-embedding-3-small",
+    #     input=x
+    # )
+    # print(response)
     
-    net = exper2()
     
     
-    nodes, edges, heading, height, width, options = net.get_network_data()
+    nodes, edges, heading, height, width, options = network_graph.get_network_data()
     serializedNodes = json.dumps(nodes)
     serializedEdges = json.dumps(edges)
-    nodesCount = net.num_nodes()
-    edgesCount = net.num_edges()
-    
-    # print(nodes)
-    # print("----------------------------------------------------")
-    # print(edges)
-   
-    
-    # return render(request, "basic_template.html", {"cdn_resources": "local"})
+    nodesCount = network_graph.num_nodes()
+    edgesCount = network_graph.num_edges()
     
     return render(request, "template.html", {
         "height": "100vh",
@@ -54,6 +59,63 @@ def constructGraph(request):
         }
     )
     
+def initOpenAI():
+    client = OpenAI()
+    OpenAI.api_key = os.environ["OPENAI_API_KEY"]
+    return client
+
+def candidate_source():
+    tweets = TweetNode.objects.all()
+    for tweet in tweets:
+        x = tweet
+    edges = build_edges(tweets)
+        
+    return tweets, edges
+
+def build_edges(tweets):
+    tweets = tweets
+    sorted_embeddings = []
+    dict_embeddings = {}
+    edges = {}
+    connection_threeshold = 5
+    for tweet in tweets:
+        target_embedding = dict_embeddings[tweet.id]
+        target_index = -1
+        left = 0 
+        right = len(sorted_embeddings) - 1
+        while left <= right:
+            mid = (left + right)//2
+            if sorted_embeddings[mid] == target_embedding:
+                target_index = mid
+            elif sorted_embeddings[mid] < target_embedding:
+                left = mid + 1
+            else:
+                right = mid - 1
+                
+        if target_index == -1:
+           print(f"target embedding was not found in sorted_embeddings for {tweet.id}")        
+        
+        while (left >= 0) and (threshold <= cosine_distance(sorted_embeddings[left][1], target_embedding)):
+            if tweet.id not in edges:
+                edges[tweet.id] = [(tweet.id, sorted_embeddings[mid][0], edge_weight(cosine_distance(sorted_embeddings[left][1], target_embedding)))]
+            else:
+                edges[tweet.id].append((tweet.id, sorted_embeddings[mid][0], edge_weight(cosine_distance(sorted_embeddings[left][1], target_embedding))))
+            
+        while (right < len(sorted_embeddings)) and (threshold <= cosine_distance(sorted_embeddings[right][1], target_embedding)):
+            if tweet.id not in edges:
+                edges[tweet.id] = [(tweet.id, sorted_embeddings[mid][0], edge_weight(cosine_distance(sorted_embeddings[right][1], target_embedding)))]
+            else:
+                edges[tweet.id].append((tweet.id, sorted_embeddings[mid][0], edge_weight(cosine_distance(sorted_embeddings[right][1], target_embedding))))
+       
+                
+    return edges           
+                
+def cosine_distance(vector1, vector2):
+    return cosine(vector1, vector2)
+    
+def edge_weight(cosine_distance):
+    return 3
+
 def constructNetwork(networkSetting):
     return Network(networkSetting)
 
@@ -70,6 +132,10 @@ def addEdges(net, edges):
     return net.add_edges(edges)
     
     
+    
+    
+    
+
 
 
 
@@ -103,13 +169,4 @@ def experiment():
     # net.hrepulsion()
     return net
 
-
-
-def exper2():
-
-    tweets = TweetNode.objects.all()
-    net = Network(neighborhood_highlight=True)
-    for tweet in tweets:
-        print(tweet.id)
-        net.add_node(tweet.id, tweet.title)
-    return net
+   
