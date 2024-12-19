@@ -13,13 +13,15 @@ from scipy.spatial.distance import cosine
     
 def constructGraph(request):
     client = initOpenAI()
-    tweets, edges = candidate_source()
+    tweets = candidate_source()
+    edges = build_edges(tweets)
     network_graph = Network(neighborhood_highlight=True)
     for tweet in tweets:
         print(tweet.id)
         network_graph.add_node(tweet.id, tweet.title)
     
-    network_graph.add_edges(edges)
+    print(edges)
+    # network_graph.add_edges(edges)
         
     # response = client.embeddings.create(
     #     model="text-embedding-3-small",
@@ -35,29 +37,30 @@ def constructGraph(request):
     nodesCount = network_graph.num_nodes()
     edgesCount = network_graph.num_edges()
     
-    return render(request, "template.html", {
-        "height": "100vh",
-        "width": width,
-        "nodes": serializedNodes,
-        "edges": serializedEdges,
-        "nodesCount": nodesCount,
-        "edgesCount": edgesCount,
-        "heading": heading,
-        "options": options,
-        "physics_enabled": True,
-        "use_DOT": net.use_DOT,
-        "dot_lang": net.dot_lang,
-        "widget": net.widget,
-        "bgcolor": "#2a2239",
-        "conf": net.conf,
-        "tooltip_link": True,
-        "neighborhood_highlight": net.neighborhood_highlight,
-        "select_menu": net.select_menu,
-        "filter_menu": net.filter_menu,
-        "notebook": False,
-        "cdn_resources": net.cdn_resources
-        }
-    )
+    return render(request, "basic_template.html", {"cdn_resources" : "local"})
+    # return render(request, "template.html", {
+    #     "height": "100vh",
+    #     "width": width,
+    #     "nodes": serializedNodes,
+    #     "edges": serializedEdges,
+    #     "nodesCount": nodesCount,
+    #     "edgesCount": edgesCount,
+    #     "heading": heading,
+    #     "options": options,
+    #     "physics_enabled": True,
+    #     "use_DOT": net.use_DOT,
+    #     "dot_lang": net.dot_lang,
+    #     "widget": net.widget,
+    #     "bgcolor": "#2a2239",
+    #     "conf": net.conf,
+    #     "tooltip_link": True,
+    #     "neighborhood_highlight": net.neighborhood_highlight,
+    #     "select_menu": net.select_menu,
+    #     "filter_menu": net.filter_menu,
+    #     "notebook": False,
+    #     "cdn_resources": net.cdn_resources
+    #     }
+    # )
     
 def initOpenAI():
     client = OpenAI()
@@ -65,12 +68,8 @@ def initOpenAI():
     return client
 
 def candidate_source():
-    tweets = TweetNode.objects.all()
-    for tweet in tweets:
-        x = tweet
-    edges = build_edges(tweets)
-        
-    return tweets, edges
+    tweets = TweetNode.objects.all()   
+    return tweets
 
 def build_edges(tweets):
     tweets = tweets
@@ -78,6 +77,7 @@ def build_edges(tweets):
     dict_embeddings = {}
     edges = {}
     connection_threeshold = 5
+    threshold = 0
     for tweet in tweets:
         target_embedding = dict_embeddings[tweet.id]
         target_index = -1
@@ -95,17 +95,47 @@ def build_edges(tweets):
         if target_index == -1:
            print(f"target embedding was not found in sorted_embeddings for {tweet.id}")        
         
-        while (left >= 0) and (threshold <= cosine_distance(sorted_embeddings[left][1], target_embedding)):
+        while (
+            left >= 0 
+            and threshold <= cosine_distance(sorted_embeddings[left][1], target_embedding)
+        ):
             if tweet.id not in edges:
-                edges[tweet.id] = [(tweet.id, sorted_embeddings[mid][0], edge_weight(cosine_distance(sorted_embeddings[left][1], target_embedding)))]
+                edges[tweet.id] = [
+                    (
+                        tweet.id, 
+                        sorted_embeddings[mid][0], 
+                        edge_weight(cosine_distance(sorted_embeddings[left][1], target_embedding))
+                    )
+                ]
             else:
-                edges[tweet.id].append((tweet.id, sorted_embeddings[mid][0], edge_weight(cosine_distance(sorted_embeddings[left][1], target_embedding))))
+                edges[tweet.id].append(
+                    (
+                        tweet.id, 
+                        sorted_embeddings[mid][0], 
+                        edge_weight(cosine_distance(sorted_embeddings[left][1], target_embedding))
+                    )
+                )
             
-        while (right < len(sorted_embeddings)) and (threshold <= cosine_distance(sorted_embeddings[right][1], target_embedding)):
+        while (
+            right < len(sorted_embeddings) 
+            and threshold <= cosine_distance(sorted_embeddings[right][1], target_embedding)
+        ):
             if tweet.id not in edges:
-                edges[tweet.id] = [(tweet.id, sorted_embeddings[mid][0], edge_weight(cosine_distance(sorted_embeddings[right][1], target_embedding)))]
+                edges[tweet.id] = [
+                    (
+                        tweet.id, 
+                        sorted_embeddings[mid][0], 
+                        edge_weight(cosine_distance(sorted_embeddings[right][1], target_embedding))
+                     )
+                ]
             else:
-                edges[tweet.id].append((tweet.id, sorted_embeddings[mid][0], edge_weight(cosine_distance(sorted_embeddings[right][1], target_embedding))))
+                edges[tweet.id].append(
+                    (
+                        tweet.id, 
+                        sorted_embeddings[mid][0], 
+                        edge_weight(cosine_distance(sorted_embeddings[right][1], target_embedding))
+                    )
+                )
        
                 
     return edges           
