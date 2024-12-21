@@ -1,17 +1,19 @@
-# from .models import TweetNode
-from openai import OpenAI
-import os
-
+from tweets.models import TweetNode
+from .openAIClientProvider import OpenAIClientProvider
 class Candidates:
-    def __init__():
+    def __init__(self):
+        self.openAIClientProvider = OpenAIClientProvider()
+        self.tweets = TweetNode.objects.all()  
+        self.embeddings = None
+    
+    def get_all_tweets(self):
+        return self.tweets
+    
+    def get_all_embeddings(self):
+        return self.embeddings
+    
+    def get_sorted_embeddings_list(self):
         pass
     
-    def get_all_candidates():
-        # tweets = TweetNode.objects.all()   
-        # return tweets
+    def get_tweetId_embedding_map(self):
         pass
-    
-    def initOpenAI():
-        client = OpenAI()
-        OpenAI.api_key = os.environ["OPENAI_API_KEY"]
-        return client

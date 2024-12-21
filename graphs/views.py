@@ -12,7 +12,7 @@ from scipy.spatial.distance import cosine
     
 
 
-def experiment():
+def experiment(request):
     
     net = Network(neighborhood_highlight=True)
     
