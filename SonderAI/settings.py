@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'tweets',
     'graphs',
     'candidate_source',
     'django.contrib.admin',
@@ -89,7 +90,7 @@ WSGI_APPLICATION = 'SonderAI.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'graphs',
+        'NAME': 'sonderai',
         'USER': 'postgres',
         'PASSWORD': "1234",
         'HOST': 'localhost',
