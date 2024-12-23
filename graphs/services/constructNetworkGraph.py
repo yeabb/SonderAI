@@ -32,7 +32,7 @@ class ConstructNetworkGraph:
             self._tweetId_embedding_map = self.candidates.get_tweetId_embedding_map()
         return self._tweetId_embedding_map
 
-    def constructGraph(self):
+    def constructHomePageGraph(self):
         self.build_edges()
         for tweet in self.tweets:
             print(tweet.id)
@@ -52,6 +52,8 @@ class ConstructNetworkGraph:
         connection_threeshold = 5
         threshold = 0
         for tweet in self.tweets:
+            # for each tweet do a binary search to find the 
+            # index of it's embeddings in the sorted embedding list
             target_embedding = self.tweetId_embedding_map[tweet.id]
             target_index = -1
             left = 0 
@@ -68,6 +70,7 @@ class ConstructNetworkGraph:
             if target_index == -1:
                 print(f"target embedding was not found in sorted_embeddings for {tweet.id}")        
             
+            # after finding the target index, slide scan to the left
             while (
                 left >= 0 
                 and threshold <= self.cosine_distance(self.sorted_embeddings[left][1], target_embedding)
@@ -90,7 +93,8 @@ class ConstructNetworkGraph:
                     )
                     
                 left-=1
-                
+            
+            # slide scan to the right    
             while (
                 right < len(self.sorted_embeddings) 
                 and threshold <= self.cosine_distance(self.sorted_embeddings[right][1], target_embedding)
