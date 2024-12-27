@@ -1,8 +1,9 @@
 from tweets.models import TweetNode
-from .openAIClientProvider import OpenAIClientProvider
+from ...tweets.services.openAIClientProvider import OpenAIClientProvider
+from ...tweets.services.pineConeClientProvider import PineConeClientProvider
 class Candidates:
     def __init__(self):
-        self.openAIClientProvider = OpenAIClientProvider()
+        self.pineConeClientProvider = PineConeClientProvider()
         self.tweets = TweetNode.objects.all()  
         self.embeddings = None
     
@@ -10,7 +11,7 @@ class Candidates:
         return self.tweets
     
     def get_all_embeddings(self):
-        return self.embeddings
+        return self.embeddings #TODO add logic to retrieve data from the pine index
     
     def get_sorted_embeddings_list(self):
         pass
