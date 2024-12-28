@@ -1,6 +1,5 @@
 import os
-import pinecone
-from pinecone import ServerlessSpec
+from pinecone import Pinecone, ServerlessSpec
 import time
 
 class PineConeClientProvider:
@@ -10,12 +9,11 @@ class PineConeClientProvider:
         if not api_key:
             raise ValueError("PINECONE_API_KEY is not set in environment variables.")
         
-        pinecone.init(
-            api_key = api_key,
-            enviroment = "us-east-1"
+        self.pc = Pinecone(
+            api_key = api_key
         )
         
-        self.index_name = "example_index"
+        self.index_name = "example-index"
         self.dimention = 1024
         self.metric = "cosine"
         
@@ -25,8 +23,8 @@ class PineConeClientProvider:
         """
         Ensures the Pinecone index is created if it doesn't already exist
         """
-        if not pinecone.list_indexes() or self.index_name not in pinecone.list_indexes():
-            pinecone.create_index(
+        if not self.pc.list_indexes() or self.index_name not in self.pc.list_indexes().names():
+            self.pc.create_index(
                 name = self.index_name,
                 dimension = self.dimention,
                 metric = self.metric,
@@ -35,24 +33,28 @@ class PineConeClientProvider:
                     region = "us-east-1"
                 )
             )
+            
+        while not self.pc.describe_index(self.index_name).status['ready']:
+            time.sleep(1)
     
     def persist_embedding(self, embedding_doc):
         """
         Persists an embedding into the Pinecone index.
 
         Args:
-            doc (dict): A dictionary containing 'tweet_id', 'embedding', and 'tweet_metadata'.
+            embedding_doc (dict): A dictionary containing 'tweet_id', 'embedding', and 'tweet_metadata'.
         """
         
-        index = pinecone.Index(self.index_name)
+        index = self.pc.Index(self.index_name)
         
         vector = {
-            "id": embedding_doc["tweet_id"],  # ID must be a string as required by Pinecone
+            "id": str(embedding_doc["tweet_id"]),  # ID must be a string as required by Pinecone
             "values": embedding_doc["embedding"],
-            "metadata": embedding_doc["tweet_metadata"]
+            "metadata": {"text": embedding_doc["metadata"]}
             }
         
-        index.upsert(vector)   
-    
+        index.upsert([vector])   
+        
+        
     
         
