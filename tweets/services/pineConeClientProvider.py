@@ -14,10 +14,12 @@ class PineConeClientProvider:
         )
         
         self.index_name = "example-index"
+        self.index = None
         self.dimention = 1024
         self.metric = "cosine"
         
         self._ensure_index()
+        self.index = self.pc.Index(self.index_name)
         
     def _ensure_index(self):
         """
@@ -37,7 +39,7 @@ class PineConeClientProvider:
         while not self.pc.describe_index(self.index_name).status['ready']:
             time.sleep(1)
     
-    def persist_embedding(self, embedding_doc):
+    def persist_embedding(self, embedding_doc): #TODO we have to change this from utility(non return type) to a return type function
         """
         Persists an embedding into the Pinecone index.
 
@@ -45,16 +47,56 @@ class PineConeClientProvider:
             embedding_doc (dict): A dictionary containing 'tweet_id', 'embedding', and 'tweet_metadata'.
         """
         
-        index = self.pc.Index(self.index_name)
-        
         vector = {
             "id": str(embedding_doc["tweet_id"]),  # ID must be a string as required by Pinecone
             "values": embedding_doc["embedding"],
             "metadata": {"text": embedding_doc["metadata"]}
             }
         
-        index.upsert([vector])   
+        self.index.upsert([vector])   
         
         
+    def query_embeddings(self, input_query_vector):
+        """ 
+        This method queries the index for the top_k most similar vectors
+        
+        Args:
+            input_query_vector: an embedding vector to query the most similar embeddig vectors from the pinecone database
+            
+        Returns:
+            A list of dicts 
+            
+           Example >>>
+           
+            [
+                {'id': 'vec2',
+                'metadata': {'text': 'The tech company Apple is known for its '
+                                    'innovative products like the iPhone.'},
+                'score': 0.8727808,
+                'sparse_values': {'indices': [], 'values': []},
+                'values': [-0.006929283495992422,-0.005336422007530928, -4.547132266452536e-05,-0.024047505110502243]
+                },
+                
+                {'id': 'vec4',
+                'metadata': {'text': 'Apple Inc. has revolutionized the tech '
+                                    'industry with its sleek designs and '
+                                    'user-friendly interfaces.'},
+                'score': 0.8526099,
+                'sparse_values': {'indices': [], 'values': []},
+                'values': [-0.006929283495992422,-0.005336422007530928, -4.547132266452536e-05,-0.024047505110502243]
+                }
+            
+            ]
+            
+        """
+        
+        results = self.index.query(
+            vector = input_query_vector,
+            top_k = 25,
+            include_values = True,
+            include_metadata = True
+        ) 
+        
+        return results["matches"]     
     
-        
+    
