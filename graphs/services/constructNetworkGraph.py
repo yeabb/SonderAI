@@ -19,8 +19,8 @@ class ConstructNetworkGraph:
     '''
     @property
     def tweets_with_embeddings(self):
-        if not self.values_already_fetched:
-            self._tweets_with_embeddings = self.candidates.get_all_tweets_with_embeddings(self.user_id)
+        if self.values_already_fetched == False:
+            self._tweets_with_embeddings = self.candidates.get_all_tweets_with_embeddings()
             self.values_already_fetched = True
         return self._tweets_with_embeddings
 
@@ -75,21 +75,21 @@ class ConstructNetworkGraph:
         ] 
         
        '''
-        tweets_with_embeddings = self.tweets_with_embeddings   #call the lazy initialization property function
+        tweets_with_embeddings = self.tweets_with_embeddings   #call the lazy initialization @property function
         cosine_similarity_threshold = 0.1
         visited_nodes = set()
         
-        '''
-        TODO: I guess we can find the mid point and end the for loop there 
-              since the mid point mean technically every combination has been explored??
-        '''
+        
         for i in range (len(tweets_with_embeddings)):
-            if i+1 < len(tweets_with_embeddings) - 1:
+            if i+1 < len(tweets_with_embeddings):
                 for j in range (i+1, len(tweets_with_embeddings)):
-                    origin_node_id = tweets_with_embeddings[i]["embedding"]["values"]
-                    destination_node_id = tweets_with_embeddings[j]["embedding"]["values"]
-                    cosine_similarity = self.cosine_similarity(origin_node_id, destination_node_id)
+                    origin_node_id = tweets_with_embeddings[i]["embedding"]["id"]
+                    destination_node_id = tweets_with_embeddings[j]["embedding"]["id"]
+                    origin_node_vector_embedding = tweets_with_embeddings[i]["embedding"]["values"]
+                    destination_node_vector_embedding = tweets_with_embeddings[j]["embedding"]["values"]
                     
+                    cosine_similarity = self.cosine_similarity(origin_node_vector_embedding, destination_node_vector_embedding)
+
                     #check if the cosine similarity is large enough to connect the nodes
                     if cosine_similarity_threshold >= cosine_similarity: 
                         if  origin_node_id not in self.edges:
@@ -100,13 +100,23 @@ class ConstructNetworkGraph:
                                     self.edge_weight(cosine_similarity)
                                 )
                             ]
-                            self.edges[destination_node_id] = [
-                                (
-                                    destination_node_id, #tweet_id of the destination tweet node
-                                    origin_node_id, #tweet_id of the origin tweet node
-                                    self.edge_weight(cosine_similarity)
+                            if destination_node_id not in self.edges:
+                                self.edges[destination_node_id] = [
+                                    (
+                                        destination_node_id, #tweet_id of the destination tweet node
+                                        origin_node_id, #tweet_id of the origin tweet node
+                                        self.edge_weight(cosine_similarity)
+                                    )
+                                ]
+                                
+                            else:
+                                self.edges[destination_node_id].append(
+                                    (
+                                        destination_node_id, 
+                                        origin_node_id, 
+                                        self.edge_weight(cosine_similarity)
+                                    )
                                 )
-                            ]
                             
                         else:
                             self.edges[origin_node_id].append(
@@ -117,13 +127,23 @@ class ConstructNetworkGraph:
                                 )
                             )
                             
-                            self.edges[destination_node_id].append(
-                                (
-                                    destination_node_id, 
-                                    origin_node_id, 
-                                    self.edge_weight(cosine_similarity)
+                            if destination_node_id not in self.edges:
+                                self.edges[destination_node_id] = [
+                                    (
+                                        destination_node_id, 
+                                        origin_node_id, 
+                                        self.edge_weight(cosine_similarity)
+                                    )
+                                ]
+                                
+                            else:
+                                self.edges[destination_node_id].append(
+                                    (
+                                        destination_node_id, 
+                                        origin_node_id, 
+                                        self.edge_weight(cosine_similarity)
+                                    )
                                 )
-                            )
                             
     '''
     Params:
@@ -133,10 +153,10 @@ class ConstructNetworkGraph:
         cosine similarity
         cosine similarity =  1 - cosine distance
     '''                       
-    def cosine_similarity(vector1, vector2):
+    def cosine_similarity(self, vector1, vector2):
         return 1 - cosine(vector1, vector2)
         
-    def edge_weight(cosine_distance):
+    def edge_weight(self, cosine_distance):
         return 3
 
     
