@@ -69,23 +69,24 @@ class PineConeClientProvider:
            Example >>>
            
             [
-                {'id': 'vec2',
-                'metadata': {'text': 'The tech company Apple is known for its '
-                                    'innovative products like the iPhone.'},
-                'score': 0.8727808,
-                'sparse_values': {'indices': [], 'values': []},
-                'values': [-0.006929283495992422,-0.005336422007530928, -4.547132266452536e-05,-0.024047505110502243]
+                {
+                    'id': 'tweet-id1',
+                    'metadata': {'text': 'The tech company Apple is known for its '
+                                        'innovative products like the iPhone.'},
+                    'score': 0.8727808,
+                    'sparse_values': {'indices': [], 'values': []},
+                    'values': [-0.006929283495992422,-0.005336422007530928, -4.547132266452536e-05,-0.024047505110502243]
                 },
                 
-                {'id': 'vec4',
-                'metadata': {'text': 'Apple Inc. has revolutionized the tech '
-                                    'industry with its sleek designs and '
-                                    'user-friendly interfaces.'},
-                'score': 0.8526099,
-                'sparse_values': {'indices': [], 'values': []},
-                'values': [-0.006929283495992422,-0.005336422007530928, -4.547132266452536e-05,-0.024047505110502243]
+                {
+                    'id': 'tweet-id2',
+                    'metadata': {'text': 'Apple Inc. has revolutionized the tech '
+                                        'industry with its sleek designs and '
+                                        'user-friendly interfaces.'},
+                    'score': 0.8526099,
+                    'sparse_values': {'indices': [], 'values': []},
+                    'values': [-0.006929283495992422,-0.005336422007530928, -4.547132266452536e-05,-0.024047505110502243]
                 }
-            
             ]
             
         """
@@ -100,3 +101,6 @@ class PineConeClientProvider:
         return results["matches"]     
     
     
+    def delete_index(self):
+        self.pc.delete_index("example-index")
+        print("index_deleted_successfully")
