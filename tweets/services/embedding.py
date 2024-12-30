@@ -23,5 +23,5 @@ class Embedding:
     def persist_embedding(self, embedding_doc):
         self.pineConeClient.persist_embedding(embedding_doc)
         
-    def query_embeddings(self, input_query_vector):
-        return self.pineConeClient.query_all_embeddings(input_query_vector)
+    def query_vector_embeddings(self, input_query_vector):
+        return self.pineConeClient.query_embeddings(input_query_vector)

@@ -55,7 +55,6 @@ class PineConeClientProvider:
         
         self.index.upsert([vector])   
         
-        
     def query_embeddings(self, input_query_vector):
         """ 
         This method queries the index for the top_k most similar vectors
@@ -99,7 +98,6 @@ class PineConeClientProvider:
         ) 
         
         return results["matches"]     
-    
     
     def delete_index(self):
         self.pc.delete_index("example-index")

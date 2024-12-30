@@ -9,18 +9,21 @@ class ConstructNetworkGraph:
         self.user_id = user_id
         self.candidates = Candidates(self.user_id)
         self.network_graph = Network(neighborhood_highlight=True)
+        self.tweet_id_to_tweetNode_map = None
         self.values_already_fetched = False     
         self.edges = {}
     
         self._tweets_with_embeddings = None   
         
     '''
-    To help in lazy initialization to save compute and avoid repetitive value fetching if it was already fetched recently
+    To help in lazy initialization to save compute and avoid repetitive 
+    value fetching if it was already fetched recently
     '''
     @property
     def tweets_with_embeddings(self):
         if self.values_already_fetched == False:
             self._tweets_with_embeddings = self.candidates.get_all_tweets_with_embeddings()
+            self.tweet_id_to_tweetNode_map = self.candidates.tweet_id_to_tweetNode_map
             self.values_already_fetched = True
         return self._tweets_with_embeddings
 
