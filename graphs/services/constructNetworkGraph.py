@@ -10,8 +10,10 @@ class ConstructNetworkGraph:
         self.candidates = Candidates(self.user_id)
         self.network_graph = Network(neighborhood_highlight=True)
         self.tweet_id_to_tweetNode_map = None
-        self.values_already_fetched = False     
-        self.edges = {}
+        self.values_already_fetched = False    
+         
+        #This is cyclic, which means if we have 2 nodes A and B, self.edges will have both [A:[(A, B, W)], B:[(B, A, W)]]
+        self.edges = {}  
     
         self._tweets_with_embeddings = None   
         
@@ -27,7 +29,6 @@ class ConstructNetworkGraph:
             self.values_already_fetched = True
         return self._tweets_with_embeddings
 
-
     def constructHomePageGraph(self):
         self.build_edges()
         # for tweet in self.tweets:
@@ -37,8 +38,15 @@ class ConstructNetworkGraph:
         # self.network_graph.add_edges(self.edges)
         
         print(self.edges)
+        self.add_nodes()
+        self.add_edges()
         
-        # nodes, edges, heading, height, width, options = self.network_graph.get_network_data()
+        nodes, edges, heading, height, width, options = self.network_graph.get_network_data()
+        print("ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo")
+        print(nodes)
+        print("")
+        print("")
+        print(edges)
         # serializedNodes = json.dumps(nodes)
         # serializedEdges = json.dumps(edges)
         # nodesCount = self.network_graph.num_nodes()
@@ -147,99 +155,30 @@ class ConstructNetworkGraph:
                                         self.edge_weight(cosine_similarity)
                                     )
                                 )
-                            
-    '''
-    Params:
-        vector1, vector2 (embedding vectors)
-        
-    Returns: 
-        cosine similarity
-        cosine similarity =  1 - cosine distance
-    '''                       
+        return self.edges     
+                                         
     def cosine_similarity(self, vector1, vector2):
+        '''
+        Params:
+            vector1, vector2 (embedding vectors)
+            
+        Returns: 
+            cosine similarity
+            cosine similarity =  1 - cosine distance
+        ''' 
         return 1 - cosine(vector1, vector2)
         
     def edge_weight(self, cosine_distance):
         return 3
 
+    def add_nodes(self):
+        for tweet_id, tweet_node in self.tweet_id_to_tweetNode_map.items():
+            self.network_graph.add_node(tweet_id, tweet_node.title)
+        
+    def add_edges(self):
+        list_edges = [item for sublist in self.edges.values() for item in sublist]
+        self.network_graph.add_edges(list_edges)
+        
     
     
     
-    
-    
-    
-    
-    
-    
-
-    
-    
-    
-    
-    # threshold = 0
-        # for tweet in self.tweets:
-        #     # for each tweet do a binary search to find the 
-        #     # index of it's embeddings in the sorted embedding list
-        #     target_embedding = self.tweetId_embedding_map[tweet.id]
-        #     target_index = -1
-        #     left = 0 
-        #     right = len(self.sorted_embeddings) - 1
-        #     while left <= right:
-        #         mid = (left + right)//2
-        #         if self.sorted_embeddings[mid] == target_embedding:
-        #             target_index = mid
-        #         elif self.sorted_embeddings[mid] < target_embedding:
-        #             left = mid + 1
-        #         else:
-        #             right = mid - 1
-                    
-        #     if target_index == -1:
-        #         print(f"target embedding was not found in sorted_embeddings for {tweet.id}")        
-            
-        #     # after finding the target index, slide scan to the left
-        #     while (
-        #         left >= 0 
-        #         and threshold <= self.cosine_distance(self.sorted_embeddings[left][1], target_embedding)
-        #     ):
-        #         if tweet.id not in self.edges:
-        #             self.edges[tweet.id] = [
-        #                 (
-        #                     tweet.id, #tweet_id of the origin tweet node
-        #                     self.sorted_embeddings[left][0], #tweet_id of the destination tweet node
-        #                     self.edge_weight(self.cosine_distance(self.sorted_embeddings[left][1], target_embedding))
-        #                 )
-        #             ]
-        #         else:
-        #             self.edges[tweet.id].append(
-        #                 (
-        #                     tweet.id, 
-        #                     self.sorted_embeddings[left][0], 
-        #                     self.edge_weight(self.cosine_distance(self.sorted_embeddings[left][1], target_embedding))
-        #                 )
-        #             )
-                    
-        #         left-=1
-            
-        #     # slide scan to the right    
-        #     while (
-        #         right < len(self.sorted_embeddings) 
-        #         and threshold <= self.cosine_distance(self.sorted_embeddings[right][1], target_embedding)
-        #     ):
-        #         if tweet.id not in self.edges:
-        #             self.edges[tweet.id] = [
-        #                 (
-        #                     tweet.id, 
-        #                     self.sorted_embeddings[right][0], 
-        #                     self.edge_weight(self.cosine_distance(self.sorted_embeddings[right][1], target_embedding))
-        #                 )
-        #             ]
-        #         else:
-        #             self.edges[tweet.id].append(
-        #                 (
-        #                     tweet.id, 
-        #                     self.sorted_embeddings[right][0], 
-        #                     self.edge_weight(self.cosine_distance(self.sorted_embeddings[right][1], target_embedding))
-        #                 )
-        #             )
-                    
-        #         right+=1
