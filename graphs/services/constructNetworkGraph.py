@@ -8,11 +8,12 @@ class ConstructNetworkGraph:
     def __init__(self, user_id):
         self.user_id = user_id
         self.candidates = Candidates(self.user_id)
-        self.network_graph = Network(neighborhood_highlight=True)
+        self.network_graph = Network(neighborhood_highlight=True)  #TODO: we will use SonderPyvis for the MVP and migrate to Cytoscape.js
+        self.tweets = None    # This is the QuerySet of the TweetNode instances fetched from the database (technically a list)
         self.tweet_id_to_tweetNode_map = None
         self.values_already_fetched = False    
          
-        #This is cyclic, which means if we have 2 nodes A and B, self.edges will have both [A:[(A, B, W)], B:[(B, A, W)]]
+        #This is cyclic, meaning if we have 2 nodes A and B, self.edges will have both [A:[(A, B, W)], B:[(B, A, W)]]
         self.edges = {}  
     
         self._tweets_with_embeddings = None   
@@ -25,6 +26,7 @@ class ConstructNetworkGraph:
     def tweets_with_embeddings(self):
         if self.values_already_fetched == False:
             self._tweets_with_embeddings = self.candidates.get_all_tweets_with_embeddings()
+            self.tweets = self.candidates.tweets
             self.tweet_id_to_tweetNode_map = self.candidates.tweet_id_to_tweetNode_map
             self.values_already_fetched = True
         return self._tweets_with_embeddings
@@ -171,14 +173,24 @@ class ConstructNetworkGraph:
     def edge_weight(self, cosine_distance):
         return 3
 
+    #Experimentation
     def add_nodes(self):
+        '''
+        A better way of interfacing with the network graph construction framwork (networkX or pyvis), 
+        can be that: we pass the list of the tweetNodes, and the framework(downstream service) 
+        will have a the logic to extract the required data and build a node from the tweetNode instances we pass.
+        maybe we can pass tweetnode coupled with other user specific learnt preference data so that we can 
+        customize node building to the user that is viewing them(color, node_weight, node_size etc ...)
+        '''
+        
         for tweet_id, tweet_node in self.tweet_id_to_tweetNode_map.items():
             self.network_graph.add_node(tweet_id, tweet_node.title)
-        
+            
+    #Experimentation 
     def add_edges(self):
         list_edges = [item for sublist in self.edges.values() for item in sublist]
         self.network_graph.add_edges(list_edges)
-        
+         
     
     
     

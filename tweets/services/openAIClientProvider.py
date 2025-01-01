@@ -11,7 +11,8 @@ class OpenAIClientProvider:
             raise ValueError("OPENAI_API_KEY is not set in environment variables.")
         
         self.client.api_key = self.api_key
-        
+    
+    #TODO: add a try: catch here to catch service call failures, errors and timeouts
     def generate_embedding(self, tweet_content):
         return self.client.embeddings.create(
             input = tweet_content,

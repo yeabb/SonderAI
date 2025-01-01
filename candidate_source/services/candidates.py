@@ -5,6 +5,7 @@ class Candidates:
     def __init__(self, user_id):
         self.user_id = user_id 
         self.embedding = Embedding()  
+        self.tweets = None
         self.tweet_id_to_tweetNode_map = None
         self.list_of_vector_embeddings_maps = None
         self.recommendation_vector_embedding = None
@@ -21,9 +22,9 @@ class Candidates:
         for vector_embedding_dict in self.list_of_vector_embeddings_maps:
             list_of_tweet_id.append(vector_embedding_dict["id"])
         
-        tweets = TweetNode.objects.filter(id__in = list_of_tweet_id)
+        self.tweets = TweetNode.objects.filter(id__in = list_of_tweet_id)
         tweet_id_to_tweetNode_map = {}
-        for tweet in tweets:
+        for tweet in self.tweets:
             tweet_id_to_tweetNode_map[str(tweet.id)] = tweet
         
         return tweet_id_to_tweetNode_map

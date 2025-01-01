@@ -25,6 +25,7 @@ class PineConeClientProvider:
         """
         Ensures the Pinecone index is created if it doesn't already exist
         """
+        #TODO: add a try: catch here to catch service call failures, errors and timeouts
         if not self.pc.list_indexes() or self.index_name not in self.pc.list_indexes().names():
             self.pc.create_index(
                 name = self.index_name,
@@ -39,7 +40,7 @@ class PineConeClientProvider:
         while not self.pc.describe_index(self.index_name).status['ready']:
             time.sleep(1)
     
-    def persist_embedding(self, embedding_doc): #TODO we have to change this from utility(non return type) to a return type function
+    def persist_embedding(self, embedding_doc): #TODO We have to change this from utility(non return type) to a return type function
         """
         Persists an embedding into the Pinecone index.
 
@@ -53,7 +54,7 @@ class PineConeClientProvider:
             "metadata": {"text": embedding_doc["metadata"]}
             }
         
-        self.index.upsert([vector])   
+        self.index.upsert([vector])  #TODO: add a try: catch here to catch service call failures, errors and timeouts
         
     def query_embeddings(self, input_query_vector):
         """ 
@@ -90,6 +91,7 @@ class PineConeClientProvider:
             
         """
         
+        #TODO: add a try: catch here to catch service call failures, errors and timeouts
         results = self.index.query(
             vector = input_query_vector,
             top_k = 25,

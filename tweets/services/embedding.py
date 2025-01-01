@@ -17,7 +17,7 @@ class Embedding:
             "metadata": metadata
         }
         
-        self.persist_embedding(embedding_doc)  # TODO we need a try - catch here to ensure persisting worked
+        self.persist_embedding(embedding_doc)  # TODO We need a try - catch here to ensure persisting worked as expected
         return embedding_doc    
     
     def persist_embedding(self, embedding_doc):
